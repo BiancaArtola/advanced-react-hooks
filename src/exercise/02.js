@@ -1,5 +1,5 @@
 // useCallback: custom hooks
-// http://localhost:3000/isolated/exercise/02.js
+// http://localhost:3000/isolated/final/02.js
 
 import * as React from 'react'
 import {
@@ -29,14 +29,13 @@ function asyncReducer(state, action) {
 
 function useAsync(asyncCallback, initialState, dependencies) {
   const [state, dispatch] = React.useReducer(asyncReducer, {
-    status:  'idle',
+    status: 'idle',
     data: null,
     error: null,
-    ...initialState
+    ...initialState,
   })
 
   React.useEffect(() => {
-    // 💰 this first early-exit bit is a little tricky, so let me give you a hint:
     const promise = asyncCallback()
     if (!promise) {
       return
@@ -50,16 +49,14 @@ function useAsync(asyncCallback, initialState, dependencies) {
         dispatch({type: 'rejected', error})
       },
     )
-    // 🐨 you'll accept dependencies as an array and pass that here.
-    // 🐨 because of limitations with ESLint, you'll need to ignore
-    // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
+    // too bad the eslint plugin can't statically analyze this :-(
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies)
 
   return state
 }
 
 function PokemonInfo({pokemonName}) {
-  // 🐨 here's how you'll use the new useAsync hook you're writing:
   const state = useAsync(
     () => {
       if (!pokemonName) {
@@ -71,7 +68,7 @@ function PokemonInfo({pokemonName}) {
     [pokemonName],
   )
 
-  const {data, status, error} = state
+  const {data: pokemon, status, error} = state
 
   switch (status) {
     case 'idle':
@@ -81,7 +78,7 @@ function PokemonInfo({pokemonName}) {
     case 'rejected':
       throw error
     case 'resolved':
-      return <PokemonDataView pokemon={data} />
+      return <PokemonDataView pokemon={pokemon} />
     default:
       throw new Error('This should be impossible')
   }
